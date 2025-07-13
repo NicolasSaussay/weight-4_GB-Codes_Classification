@@ -20,6 +20,9 @@ R<X> := PolynomialRing(GF(2));
       l (integer): The desired dimension of the square circulant matrix (i.e., l x l).  
       p (sequence of elements from GF(2)): A sequence representing the elements of the first row of the circulant matrix. This sequence will be extended with zeros if its length is less than l.
 
+  Outputs: 
+      A l x l matrix whose rows are given by the succesive shifts of p.
+
 
 CirculantMatrix := function(l, p)
     if #p gt l then
@@ -51,7 +54,7 @@ end function;
     The minimum distance d this CSS code is defined as the minimum Hamming weight of any non-trivial codeword in the kernel of H_X and not in the row-space of H_Z.
     This function efficiently finds this d by comparing the number of codewords of increasing weight in the relevant linear codes.
 
-    Imput : 
+    Parameters : 
     n (integer) : which is greater than 1. 
     polA (polynomial over textGF(2)) of degree < n 
     polB (polynomial over textGF(2)) of degree < n 
