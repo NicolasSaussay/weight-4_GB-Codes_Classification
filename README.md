@@ -30,7 +30,7 @@ This repository is organized as follows:
 
 ## How to Use/Reproduce
 To reproduce the results or utilize the scripts in this repository, you will need:
--   **SageMath:**: accessible via JupyterNotebook
+-   **SageMath:** accessible via JupyterNotebook
 -   **Magma:** https://magma.maths.usyd.edu.au/magma/
   
 
