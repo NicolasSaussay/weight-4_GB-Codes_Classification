@@ -23,7 +23,8 @@ Our classification focused exclusively on elementary GB codes of the form $GB(1 
 
 ## Repository Structure
 This repository is organized as follows:
-- `scripts/`: Contains SageMath and Magma scripts used for graph isomorphism checking, k-connectivity analysis and minimum distance computation of quantum codes.
+- `SageMath_scripts/`: Contains SageMath scripts used for graph isomorphism checking and k-connectivity analysis
+- `Magma_scripts/` : Contains Magma scripts used for minimum distance computation of (2,2)-GB codes.
 - `results_data/`: Processed lists of classified codes.
 - `README.md`: This file.
   
