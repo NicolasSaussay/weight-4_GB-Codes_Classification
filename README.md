@@ -35,7 +35,7 @@ To reproduce the results or utilize the scripts in this repository, you will nee
   
 
 ## Results
-The main outcomes of this classification are detailed in the `results_data/` file. This includes a comprehensive list of distinct (2,2)-GB codes, presented for each set of parameters [[2n,k,d]] with n ranging from 1 to 100. For any given parameter set, we provide all non-equivalent GB codes corresponding to it.
+The main outcomes of this classification are detailed in the `results_data/` file. This includes a comprehensive list of distinct (2,2)-GB codes, presented for each set of parameters [[2n, 2, d]] with n ranging from 1 to 100. For any given parameter set, we provide all non-equivalent GB codes corresponding to it.
 
 
 ## Citation 
