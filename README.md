@@ -25,7 +25,7 @@ Our classification focused exclusively on elementary GB codes of the form $GB(1 
 This repository is organized as follows:
 - `SageMath_scripts/`: Contains SageMath scripts used for graph isomorphism checking and k-connectivity analysis
 - `Magma_scripts/` : Contains Magma scripts used for minimum distance computation of (2,2)-GB codes.
-- `results_data/`: Processed lists of classified codes.
+- `(2,2)-GB_code_classifation/`: Processed lists of classified (2,2)-GB codes.
 - `README.md`: This file.
   
 
