@@ -1,0 +1,178 @@
+# Computational Scripts for GB Codes Classification
+
+This directory contains the computational scripts used to derive and verify the classification results for (2,2)-Generalized Bicycle (GB) codes presented in the main repository and the associated paper.
+
+You will find here **SageMath scripts:** Used primarily for exploring graph properties, such as identifying equivalence classes of isomorphic graphs and evaluating their k-connectivity.
+These scripts are provided to ensure the reproducibility of our findings and to serve as a resource for researchers interested in the computational aspects of GB codes and their related graph structures.
+
+
+## Auxiliary Functions 
+
+def GraphGB22(n, a, b):
+    """
+    Constructs a multigraph where vertices are Z/nZ (represented by 0 to n-1)
+    and each vertex x is connected to x+a and x+b modulo n.
+    Args:
+        n (int): The number of vertices (and the modulus for operations).
+        a (int): The first offset value for connections.
+        b (int): The second offset value for connections.
+    Returns:
+        Graph: The SageMath graph object.
+    """
+    # List to accumulate edges. Each edge is a tuple (u, v).
+    # SageMath Graph constructor expects a list of edges, where edges are tuples.
+    edge_set = []
+
+    # Iterate over each vertex 'x' in Z/nZ (from 0 to n-1).
+    for x_val in range(n): # Vertices are 0-indexed in SageMath
+        # Calculate the first neighbor (x+a mod n)
+        v_a = (x_val + a) % n
+
+        # Calculate the second neighbor (x+b mod n)
+        v_b = (x_val + b) % n
+
+        # Add the two edges (x_val, v_a) and (x_val, v_b) to the list.
+        # SageMath handles multiedges automatically if you pass them.
+        edge_set.append((x_val, v_a))
+        edge_set.append((x_val, v_b))
+
+        G = Graph(edge_set, multiedges=True, loops=True)
+    return G
+
+-------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
+
+def find_non_isomorphic_graph_representatives_optimized(n):
+    """
+    Optimized function to calculate representatives of isomorphism classes of
+    Cayley graphs for (2,2)-Generalized Bicycle (GB) codes.
+
+    Args:
+        n (int): The parameter for the cyclic group Z/nZ, defining the number of vertices
+                 in the graph and the degree for polynomials.
+
+    Returns:
+        list: A list of triplets [n, PolA, PolB] where PolA = 1+X^a and PolB = 1+X^b
+              are the polynomials defining a GB graph, and these triplets
+              correspond to distinct (non-isomorphic) graphs.
+    """
+
+    # --- OPTIMIZATION: Pre-calculate indices 'i' for which GCD(i, n) > 1 ---
+    # Get unique prime factors of n for faster divisibility checks.
+    prime_factors_n = set(n.prime_factors())
+
+    # Initialize the list of indices 'i' (from 2 to n-1) that share a common factor with n.
+    indices_gcd_sup_one = []
+    for i in range(2, n):
+        # Check if 'i' is divisible by any prime factor of 'n'.
+        # If so, gcd(i, n) > 1.
+        is_gcd_sup_one = False
+        for p in prime_factors_n:
+            if i % p == 0:
+                is_gcd_sup_one = True
+                break  # Found a common prime factor, no need to check others for this 'i'.
+        if is_gcd_sup_one:
+            indices_gcd_sup_one.append(i)
+
+    # --- Generate all "weight 2" polynomials (1 + X^exponent) over GF(2) ---
+    # R is the polynomial ring GF(2)['X']
+    # Ensure R is defined, e.g., R.<X> = GF(2)[]
+    # Assuming GraphGB22 is defined elsewhere (as provided in your documentation)
+    
+    list_polynomials = []
+    for exp_val in range(1, n): # Exponents 'a' and 'b' range from 1 to n-1
+        poly = R(1) + X**exp_val
+        list_polynomials.append(poly)
+
+    # --- Identify non-isomorphic graphs and their corresponding polynomial triplets ---
+    non_isomorphic_graphs = []
+    non_isomorphic_triplets = []
+
+    # Iterate through all unique pairs (a, b) where 1 <= a < b < n
+    for k_idx in range(len(list_polynomials)):
+        for l_idx in range(k_idx + 1, len(list_polynomials)):
+            k_val_for_graph = k_idx + 1 # Actual exponent 'a'
+            l_val_for_graph = l_idx + 1 # Actual exponent 'b'
+
+            # Apply the optimization condition:
+            # Only consider cases where:
+            # 1. k_val_for_graph is 1 (i.e., poly is 1+X) - since for GCD(k,n) = 1 (Z/nZ, k, l) is isomorphic to (Z/nZ, 1, l(k mod n)^{-1} mod n ) 
+            # 2. OR both k_val_for_graph and l_val_for_graph share a common factor with n
+            #    (i.e., gcd(k_val_for_graph, n) > 1 AND gcd(l_val_for_graph, n) > 1). (PS : # We can filter even more by considering only cases where GCD(k,l,n) = 1)
+
+            
+            if (k_val_for_graph == 1) or \
+               (k_val_for_graph in indices_gcd_sup_one and l_val_for_graph in indices_gcd_sup_one):
+
+                PolA = list_polynomials[k_idx]
+                PolB = list_polynomials[l_idx]
+
+                current_graph = GraphGB22(n, k_val_for_graph, l_val_for_graph)
+
+                # Check if this graph is isomorphic to any already found non-isomorphic graph
+                is_isomorphic_to_found = False
+                for known_graph in non_isomorphic_graphs:
+                    if current_graph.is_isomorphic(known_graph):
+                        is_isomorphic_to_found = True
+                        break # No need to check further, it's a duplicate
+
+                if not is_isomorphic_to_found:
+                    # If it's truly new (non-isomorphic), add it to our lists
+                    non_isomorphic_graphs.append(current_graph)
+                    non_isomorphic_triplets.append([n, PolA, PolB])
+
+    return non_isomorphic_triplets
+
+    
+
+## SageMath built-in methods
+
+.is_isomorphic() : 
+
+    Purpose:
+    Determines if two graphs are structurally identical, regardless of vertex labeling. This is crucial for identifying equivalence classes of GB codes.
+
+    Usage :
+    Graph1 = GraphGB22(8, 1, 2)
+    Graph2 = GraphGB22(8, 2, 1) # This will be isomorphic to Graph1
+    print(Graph1.is_isomorphic(Graph2)) # Expected output: True
+
+    Returns: 
+    True if the two graphs are isomorphic, False otherwise.
+
+.vertex_connextivity() : 
+
+    Purpose: 
+    Computes the vertex connectivity of the graph, which is the minimum number of vertices that must be removed to disconnect the graph (or reduce it to a trivial graph). 
+    This metric is vital for assessing graph robustness and for applying Whitney's Theorem in distinguishing 2-isomorphic graphs from 3-connected ones.
+
+    Usage : 
+    G_connectivity = GraphGB22(88, 2, 8)
+    print(G_connectivity.vertex_connectivity()) # Returns the integer k-connectivity
+
+
+.incidence_matrix() : 
+
+    Purpose: 
+    Generates the vertex-edge incidence matrix of the graph.
+
+    Usage : 
+    G_matrix = GraphGB22(8, 1, 2)
+    inc_matrix = G_matrix.incidence_matrix()
+
+
+.codes.LinearCode() :
+    
+    Purpose: 
+    Constructs a linear code from a given generator matrix
+
+    Usage : 
+    generator_matrix = matrix(GF(2), [
+    [1, 0, 1, 0, 1],
+    [0, 1, 0, 1, 1]])
+    C = codes.LinearCode(generator_matrix)
+    print(C)
+
+
+
+
