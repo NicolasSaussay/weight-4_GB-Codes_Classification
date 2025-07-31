@@ -43,6 +43,30 @@ CirculantMatrix := function(l, p)
 end function;
 
 
+// compute_dimension_GB(n, polA, polB):
+
+    Purpose : 
+        Calculates the dimension of a quantum code of type GB(A(X), B(X), n). 
+        This dimension represents the number of logical qubits (quantum information) that the code can protect, which is a critical parameter in quantum error correction.
+
+  Parameters:
+      n (integer): Must be an integer greater than or equal to 2.
+      A(X) (polynomial over GF(2)): A polynomial over GF(2) of degree sless than n with non-zero coefficients.
+      B(X) (polynomial over GF(2)): B polynomial over GF(2) of degree sless than n with non-zero coefficients. 
+
+  Outputs: 
+      An non-negative integer which corresponds to the dimension of the quantum code GB(A(X), B(X), n)
+
+compute_dimension_GB := function(n, polA, polB)
+    R<X> := PolynomialRing(GF(2)) ;
+
+    gcd_1 := GCD(polA, 1 + X^n);
+    gcd_2 := GCD(polB, gcd_1) ;
+
+    return 2*Degree(gcd_2);
+end function ;
+
+
 ------
 
 // compute_d_css_GB_2_2(n, polA, polB) : 
@@ -60,8 +84,7 @@ end function;
     polB (polynomial over textGF(2)) of degree < n 
 
     Output : 
-    < 2*n, 2, d > : where d is the minimum distance of the quantum Generalized Bicycle code GB(polA, polB, n)
-
+    < 2*n, k, d > : where k is the dimension of the quantum Generalized Bicycle code GB(polA, polB, n) and d its minimum distance.
 
 Your existing calcul_d_css_GB_2_2 function
 compute_d_css_GB_2_2 := function(n, polA, polB)
@@ -69,6 +92,8 @@ compute_d_css_GB_2_2 := function(n, polA, polB)
 
     listeA := Eltseq(polA);
     listeB := Eltseq(polB);
+
+    dim := compute_dimension_GB(n, polA, polB) ; 
 
     A := CirculantMatrix(n, listeA);
     B := CirculantMatrix(n, listeB);
@@ -89,7 +114,7 @@ compute_d_css_GB_2_2 := function(n, polA, polB)
         d := d + 1;
     end while;
 
-    return <2*n, 2, d>;
+    return <2*n, dim, d>;
 end function;
 
 --------
